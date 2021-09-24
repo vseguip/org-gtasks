@@ -235,29 +235,32 @@
 
 (defun org-gtasks-task (plst)
   (let* ((id  (plist-get plst :id))
-	 (title  (plist-get plst :title))
-	 (notes  (plist-get plst :notes))
-	 (links  (plist-get plst :links))
-	 (status (if (string= "completed" (plist-get plst :status))
-		     "DONE"
-		   "TODO"))
-	 (completed (plist-get plst :completed)))
+         (title  (plist-get plst :title))
+         (notes  (plist-get plst :notes))
+         (links  (plist-get plst :links))
+         (status (if (string= "completed" (plist-get plst :status))
+                     "DONE"
+                   "TODO"))
+         (completed (plist-get plst :completed))
+         (due (plist-get plst :due)))
     (concat (format "* %s %s\n" status title)
-	    (when completed
-	      (format "  CLOSED: [%s]\n" (org-gtasks-format-iso2org completed)))
-	    "  :PROPERTIES:\n"
-	    "  :ID: " id "\n"
-	    "  :END:\n"
-	    (when notes (concat notes "\n"))
+            (when completed
+              (format "  CLOSED: [%s]\n" (org-gtasks-format-iso2org completed)))
+            (when due
+              (format "  DEADLINE: <%s> \n"  (org-gtasks-format-iso2org due)))
+            "  :PROPERTIES:\n"
+            "  :ID: " id "\n"
+            "  :END:\n"
+            (when notes (concat notes "\n"))
             (when links
               (concat "\n  :links:\n"
                       (mapconcat (lambda (link)
-				   (let* ((type (plist-get link :type))
-					  (org-link (plist-get link :link))
-					  (desc (plist-get link :description))
-					  (str (org-make-link-string org-link desc)))
-				     (format "  - %s: %s\n" type str)))
-				 links "")
+                                   (let* ((type (plist-get link :type))
+                                          (org-link (plist-get link :link))
+                                          (desc (plist-get link :description))
+                                          (str (org-make-link-string org-link desc)))
+                                     (format "  - %s: %s\n" type str)))
+                                 links "")
                       "  :end:\n")))))
 
 (defun org-gtasks-write-to-org (account tasklist)
